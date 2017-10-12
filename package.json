@@ -1,0 +1,25 @@
+{
+  "requires": true,
+  "lockfileVersion": 1,
+  "dependencies": {
+    "express": "^4.16.2",
+    "redis": "^2.8.0"
+  },
+  "name": "aws-app-task",
+  "description": "AWS練習用アプリ",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mkiken/aws-app-task.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mkiken/aws-app-task/issues"
+  },
+  "homepage": "https://github.com/mkiken/aws-app-task#readme"
+}

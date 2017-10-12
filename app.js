@@ -25,12 +25,12 @@ app.listen(3000, function () {
 /**
  * ランキング取得 API
  *
- * @param req.query.user_id {string} - ユーザーID
+ * @param req.query.name {string} - ユーザー名
  */
-app.get('/ranking', function (req, res) {
+app.get('/user_rank', function (req, res) {
   res.header("Content-Type", "application/json; charset=utf-8");
-  if (req.query.user_id == null) {
-    let msg = 'user_id is empty.';
+  if (req.query.name == null) {
+    let msg = 'name is empty.';
     res.status(500).json(msg);
     console.error(ms);
     return;
@@ -39,7 +39,7 @@ app.get('/ranking', function (req, res) {
   client.zrevrank(
     [
       REDIS_RANKING_KEY,
-      req.query.user_id
+      req.query.name
     ],
     function (err, response) {
       if (err) {
@@ -56,15 +56,59 @@ app.get('/ranking', function (req, res) {
   });
 
 /**
+ * ランキング取得 API
+ *
+ * @param req.query.name {string} - ユーザー名
+ */
+app.get('/ranking', function (req, res) {
+  res.header("Content-Type", "application/json; charset=utf-8");
+  if (req.query.from == null || req.query.to == null || req.query.from > req.query.to) {
+    let msg = 'parameter "from" or "to" is invalid.';
+    res.status(500).json(msg);
+    console.error(ms);
+    return;
+  }
+
+  client.zrevrange(
+    [
+      REDIS_RANKING_KEY,
+      req.query.from - 1,
+      req.query.to - 1,
+      'withscores'
+    ],
+    function (err, response) {
+      if (err) {
+        res.status(500).json(err.message);
+        console.error(err);
+        return;
+      }
+
+      let rankings = [];
+      let index = 0;
+      let rank = req.query.from;
+      for (let i = 0; i < response.length; i++) {
+        rankings.push({
+          rank: rank++,
+          name: response[i++],
+          score: response[i],
+        });
+      }
+      res.json({
+        rankings: rankings
+      });
+    });
+  });
+
+/**
  * スコア記録 API
  *
- * @param req.body {Object} - {user_id: (int), score: (int)}
+ * @param req.body {Object} - {name: (int), score: (int)}
  */
 app.post('/score', function(req, res) {
   res.header("Content-Type", "application/json; charset=utf-8");
   const params = req.body;
-  if (params.user_id == null || params.score == null) {
-    let msg = 'user_id, score is empty.: ' + JSON.stringify(params);
+  if (params.name == null || params.score == null) {
+    let msg = 'name, score is empty.: ' + JSON.stringify(params);
     res.status(500).json(msg);
     console.error(msg);
     return;
@@ -74,7 +118,7 @@ app.post('/score', function(req, res) {
     [
       REDIS_RANKING_KEY,
       params.score,
-      params.user_id
+      params.name
     ],
     function (err, response) {
       if (err) {
@@ -82,7 +126,6 @@ app.post('/score', function(req, res) {
         console.error(res);
         return;
       }
-      console.log('[score] added '+response+' items.');
 
       res.json(response);
     });
