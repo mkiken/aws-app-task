@@ -19,13 +19,28 @@ log4js.configure({
 const logger = log4js.getLogger(); // ロガー取得
 
 
-var redis = require("redis"),
-    client = redis.createClient({
-      host: "mori-ageteq-redis.mk4soq.0001.apne1.cache.amazonaws.com",
-      port: 6379
-    });
+const RedisClustr = require('redis-clustr');
+const RedisClient = require('redis');
+const config = require("./config.json");
+const redis = new RedisClustr({
+    servers: [
+        {
+            host: config.redisClusterHost,
+            port: config.redisClusterPort
+        }
+    ],
+    createClient: function (port, host) {
+        // this is the default behaviour
+        return RedisClient.createClient(port, host);
+    }
+});
+// const redis = require("redis"),
+//     client = redis.createClient({
+//       host: "mori-ageteq-redis.mk4soq.0001.apne1.cache.amazonaws.com",
+//       port: 6379
+//     });
 
-client.on("error", function (err) {
+redis.on("error", function (err) {
   logger.info("Error " + err);
 });
 
@@ -54,7 +69,7 @@ app.get('/user_rank', function (req, res) {
     return;
   }
 
-  client.zrevrank(
+  redis.zrevrank(
     [
       REDIS_RANKING_KEY,
       req.query.name
@@ -87,7 +102,7 @@ app.get('/ranking', function (req, res) {
     return;
   }
 
-  client.zrevrange(
+  redis.zrevrange(
     [
       REDIS_RANKING_KEY,
       req.query.from - 1,
@@ -134,7 +149,7 @@ app.post('/score', function(req, res) {
 
   logger.info(util.format("record score.\t%s\t%d", params.name, params.score));
 
-  client.zadd(
+  redis.zadd(
     [
       REDIS_RANKING_KEY,
       params.score,

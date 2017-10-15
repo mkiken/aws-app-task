@@ -1,0 +1,4 @@
+{
+  "redisClusterHost": "mori-ageteq-redis-2.mk4soq.clustercfg.apne1.cache.amazonaws.com",
+  "redisClusterPort": 6379
+}
