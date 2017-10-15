@@ -5,7 +5,10 @@ const app = express();
 const REDIS_RANKING_KEY = 'ranking';
 
 var redis = require("redis"),
-    client = redis.createClient();
+    client = redis.createClient({
+      host: "mori-ageteq-redis.mk4soq.0001.apne1.cache.amazonaws.com",
+      port: 6379
+    });
 
 client.on("error", function (err) {
   console.log("Error " + err);
