@@ -4,6 +4,20 @@ const bodyParser = require('body-parser');
 const app = express();
 const REDIS_RANKING_KEY = 'ranking';
 
+const log4js = require('log4js'); //log4jsモジュール読み込み
+
+log4js.configure({
+  appenders: {
+    everything: { type: 'dateFile', filename: 'logs/all-the-logs.log' }
+  },
+  categories: {
+    default: { appenders: [ 'everything' ], level: 'debug' }
+  }
+});
+
+const logger = log4js.getLogger(); // ロガー取得
+
+
 var redis = require("redis"),
     client = redis.createClient({
       host: "mori-ageteq-redis.mk4soq.0001.apne1.cache.amazonaws.com",
@@ -11,7 +25,7 @@ var redis = require("redis"),
     });
 
 client.on("error", function (err) {
-  console.log("Error " + err);
+  logger.info("Error " + err);
 });
 
 // urlencodedとjsonは別々に初期化する
@@ -22,7 +36,7 @@ app.use(bodyParser.json());
 
 
 app.listen(3000, function () {
-  console.log('listening start on port 3000.');
+  logger.info('listening start on port 3000.');
 });
 
 /**
@@ -35,7 +49,7 @@ app.get('/user_rank', function (req, res) {
   if (req.query.name == null) {
     let msg = 'name is empty.';
     res.status(500).json(msg);
-    console.error(msg);
+    logger.error(msg);
     return;
   }
 
@@ -47,7 +61,7 @@ app.get('/user_rank', function (req, res) {
     function (err, response) {
       if (err) {
         res.status(500).json(err.message);
-        console.error(err);
+        logger.error(err);
         return;
       }
       if (typeof response === 'number'){
@@ -68,7 +82,7 @@ app.get('/ranking', function (req, res) {
   if (req.query.from == null || req.query.to == null || req.query.from > req.query.to) {
     let msg = 'parameter "from" or "to" is invalid.';
     res.status(500).json(msg);
-    console.error(msg);
+    logger.error(msg);
     return;
   }
 
@@ -82,7 +96,7 @@ app.get('/ranking', function (req, res) {
     function (err, response) {
       if (err) {
         res.status(500).json(err.message);
-        console.error(err);
+        logger.error(err);
         return;
       }
 
@@ -113,7 +127,7 @@ app.post('/score', function(req, res) {
   if (params.name == null || params.score == null) {
     let msg = 'name, score is empty.: ' + JSON.stringify(params);
     res.status(500).json(msg);
-    console.error(msg);
+    logger.error(msg);
     return;
   }
 
@@ -126,7 +140,7 @@ app.post('/score', function(req, res) {
     function (err, response) {
       if (err) {
         res.status(500).json(err.message);
-        console.error(res);
+        logger.error(res);
         return;
       }
 
