@@ -5,6 +5,7 @@ const app = express();
 const REDIS_RANKING_KEY = 'ranking';
 
 const log4js = require('log4js'); //log4jsモジュール読み込み
+const util = require('util');
 
 log4js.configure({
   appenders: {
@@ -130,6 +131,8 @@ app.post('/score', function(req, res) {
     logger.error(msg);
     return;
   }
+
+  logger.info(util.format("record score.\t%s\t%d", params.name, params.score));
 
   client.zadd(
     [
