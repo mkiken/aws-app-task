@@ -32,7 +32,7 @@ app.get('/user_rank', function (req, res) {
   if (req.query.name == null) {
     let msg = 'name is empty.';
     res.status(500).json(msg);
-    console.error(ms);
+    console.error(msg);
     return;
   }
 
@@ -65,7 +65,7 @@ app.get('/ranking', function (req, res) {
   if (req.query.from == null || req.query.to == null || req.query.from > req.query.to) {
     let msg = 'parameter "from" or "to" is invalid.';
     res.status(500).json(msg);
-    console.error(ms);
+    console.error(msg);
     return;
   }
 
